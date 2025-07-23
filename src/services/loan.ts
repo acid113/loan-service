@@ -1,49 +1,111 @@
+import { db } from '#/database/db';
 import { Loan } from '#/models/loan';
+import { LOAN_STATUS } from '#/util/constants';
 
 export class LoanService {
-  private loans: Loan[] = [];
+  async getAllLoans(): Promise<Loan[] | null> {
+    const result = await db.query('SELECT * FROM loans ORDER BY applicantName ASC');
+    if (result.rowCount === 0) return null;
 
-  getAllLoans(): Loan[] {
-    return this.loans;
+    return result.rows;
   }
 
-  getLoanById(id: string): Loan | undefined {
-    return this.loans.find((loan) => loan.id === id);
+  async getLoanById(id: string): Promise<Loan | null> {
+    const result = await db.query('SELECT * FROM loans WHERE id = $1', [id]);
+    if (result.rowCount === 0) return null;
+
+    return result.rows[0];
   }
 
-  createLoan(applicantName: string, requestedAmount: number): Loan {
-    const loan: Loan = {
-      id: crypto.randomUUID(),
-      applicantName,
-      requestedAmount,
-      status: 'PENDING',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  async createLoan(applicantName: string, requestedAmount: number): Promise<Loan> {
+    const now = new Date();
+    const result = await db.query(
+      `
+      INSERT INTO loans (applicantName, requestedAmount, status, createdAt, updatedAt)
+      VALUES ($1, $2, $3, $4, $4)
+      RETURNING *;
+    `,
+      [applicantName, requestedAmount, LOAN_STATUS.PENDING, now]
+    );
 
-    this.loans.push(loan);
-    return loan;
+    return result.rows[0];
   }
 
-  updateLoan(applicantName = null, status: null, requestedAmount?: number): Loan {
-    const loan: Loan = {
-      id: crypto.randomUUID(),
-      applicantName: applicantName ?? 'Applicant',
-      requestedAmount: requestedAmount ?? 0,
-      status: status ?? 'PENDING',
-      updatedAt: new Date(),
-    };
-
-    this.loans.push(loan);
-    return loan;
-  }
-
-  deleteLoan(id: string): boolean {
-    const index = this.loans.findIndex((loan) => loan.id === id);
-    if (index !== -1) {
-      this.loans.splice(index, 1);
-      return true;
+  async updateLoan(id: string, updates: Partial<Pick<Loan, 'applicantName' | 'requestedAmount' | 'status'>>): Promise<Loan | null> {
+    if (!updates || Object.keys(updates).length === 0) {
+      console.error('Update payload cannot be empty');
+      return null;
     }
-    return false;
+
+    // check if the loan exists
+    const existingLoan = await this.getLoanById(id);
+    if (!existingLoan) {
+      console.error(`Loan with id ${id} not found`);
+      return null;
+    }
+
+    const setClauses: string[] = [];
+    const values: (string | number | Date)[] = [];
+    let paramIndex = 1;
+
+    if (updates.applicantName) {
+      setClauses.push(`applicantName = $${paramIndex++}`);
+      values.push(updates.applicantName);
+    }
+
+    if (updates.requestedAmount) {
+      setClauses.push(`requestedAmount = $${paramIndex++}`);
+      values.push(updates.requestedAmount);
+    }
+
+    if (updates.status) {
+      setClauses.push(`status = $${paramIndex++}`);
+      values.push(updates.status);
+    }
+
+    setClauses.push(`updatedAt = $${paramIndex++}`);
+    values.push(new Date());
+
+    values.push(id);
+
+    const query = `
+      UPDATE loans
+      SET ${setClauses.join(', ')}
+      WHERE id = $${paramIndex}
+      RETURNING *;
+    `;
+
+    const result = await db.query(query, values);
+    return result.rows[0];
+  }
+
+  async rejectLoan(id: string): Promise<Loan | null> {
+    const loan = await this.getLoanById(id);
+    if (!loan) {
+      console.error(`Loan with id ${id} not found`);
+      return null;
+    }
+    const query = `
+      UPDATE loans
+      SET status = $1, updatedAt = $2
+      WHERE id = $3
+      RETURNING *;
+    `;
+    const values = [LOAN_STATUS.REJECTED, new Date(), id];
+    const result = await db.query(query, values);
+    if (result.rowCount === 0) {
+      console.error(`Loan with id ${id} not updated`);
+      return null;
+    }
+    return result.rows[0];
+  }
+
+  async deleteLoan(id: string): Promise<boolean> {
+    const result = await db.query('DELETE FROM loans WHERE id = $1', [id]);
+    if (result.rowCount === 0) {
+      return false;
+    }
+
+    return true;
   }
 }
