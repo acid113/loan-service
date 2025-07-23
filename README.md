@@ -45,18 +45,23 @@ This endpoint returns the health status of the microservice.
 
 ## Docker
 
-Build & Run the Container
+Run and build
 
 ```bash
-docker build -t service .
-docker run -p 3000:3000 service
-```
-
-With compose
-
-```
 docker-compose up --build
 ```
+
+Stop services
+
+```bash
+docker-compose down
+```
+
+## DB Server Setup
+
+New server setup
+
+_public.loans_ table
 
 ## License
 
