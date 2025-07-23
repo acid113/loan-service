@@ -17,6 +17,14 @@ COPY . .
 # Build the TypeScript code
 RUN npm run build
 
+# Use the official PostgreSQL image from Docker Hub
+FROM postgres:latest
+
+# PostgreSQL environment variables
+ENV POSTGRES_USER=admin
+ENV POSTGRES_PASSWORD=password
+ENV POSTGRES_DB=loans
+
 # Expose port
 EXPOSE 3000
 
