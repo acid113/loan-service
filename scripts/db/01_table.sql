@@ -1,8 +1,10 @@
 -- Enable UUID generation extension (if not already enabled)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+DROP TABLE IF EXISTS public.loans;
+
 -- Create the 'loans' table
-CREATE TABLE IF NOT EXISTS loans (
+CREATE TABLE IF NOT EXISTS public.loans (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     applicantName TEXT NOT NULL,
     requestedAmount NUMERIC(12, 2) NOT NULL CHECK (requestedAmount >= 0),
