@@ -43,6 +43,21 @@ The service will be running on `http://localhost:3000`.
 
 This endpoint returns the health status of the microservice.
 
+## Docker
+
+Build & Run the Container
+
+```bash
+docker build -t service .
+docker run -p 3000:3000 service
+```
+
+With compose
+
+```
+docker-compose up --build
+```
+
 ## License
 
 This project is licensed under the MIT License.
