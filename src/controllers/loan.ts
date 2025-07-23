@@ -53,6 +53,7 @@ export const createLoan = async (req: Request, res: Response) => {
 };
 
 export const updateLoan = async (req: Request, res: Response) => {
+  const { id } = req.params;
   const { applicantName, requestedAmount, status } = req.body;
   const response: GenericResponse = {};
 
@@ -61,7 +62,7 @@ export const updateLoan = async (req: Request, res: Response) => {
     return res.status(constants.HTTP_STATUS_BAD_REQUEST).json(response);
   }
 
-  const loan = await loanService.updateLoan(req.params.id, { applicantName, requestedAmount, status });
+  const loan = await loanService.updateLoan(id, { applicantName, requestedAmount, status });
   if (!loan) {
     response.message = MESSAGES.LOAN_NOT_UPDATED;
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json(response);
@@ -87,7 +88,7 @@ export const rejectLoan = async (req: Request, res: Response) => {
 };
 
 export const deleteLoan = async (req: Request, res: Response) => {
-  const { id } = req.body;
+  const { id } = req.params;
   const response: GenericResponse = {};
 
   if (!id) {

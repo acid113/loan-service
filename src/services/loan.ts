@@ -63,11 +63,7 @@ export class LoanService {
       values.push(updates.status);
     }
 
-    setClauses.push(`updatedAt = $${paramIndex++}`);
-    values.push(new Date());
-
     values.push(id);
-
     const query = `
       UPDATE loans
       SET ${setClauses.join(', ')}
