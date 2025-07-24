@@ -3,20 +3,21 @@
   "version": "1.0.0",
   "author": "Marvin Estacio",
   "description": "A sample loan microservice",
-  "main": "src/index.ts",
+  "main": "src/server.ts",
   "imports": {
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "tsx --watch --env-file .env src/index.ts",
-    "start": "node --env-file .env dist/index.js",
+    "dev": "tsx --watch --env-file .env src/server.ts",
+    "start": "node --env-file .env dist/server.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write src/**/*.ts",
     "format:check": "prettier --check src/**/*.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "license": "MIT",
   "dependencies": {
@@ -29,13 +30,17 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.15",
     "@types/pg": "^8.15.4",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-n": "^17.21.0",
     "eslint-plugin-prettier": "^5.5.3",
     "prettier": "^3.6.2",
+    "supertest": "^7.1.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.38.0"
+    "typescript-eslint": "^8.38.0",
+    "vitest": "^3.2.4"
   }
 }

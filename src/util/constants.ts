@@ -10,8 +10,6 @@ export const MESSAGES = {
   LOAN_NOT_REMOVED: 'Loan not removed',
   LOAN_REMOVED: 'Loan removed',
   LOAN_CREATED: 'Loan created successfully',
-  LOAN_NOT_REJECTED: 'Loan not rejected',
-  LOAN_REJECTED: 'Loan rejected successfully',
   LOAN_RETRIEVED: 'Loan retrieved successfully',
   LOANS_RETRIEVED: 'Loans retrieved successfully',
   LOAN_NOT_UPDATED: 'Loan not updated',
