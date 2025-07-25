@@ -2,220 +2,375 @@ import type { Request, Response } from 'express';
 import { constants } from 'http2';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import * as LoanController from '../../src/controllers/loan';
+import * as LoanController from '../controllers/loan';
+import { MESSAGES } from '#/util/constants';
 
 // Mock the service
-vi.mock('../../src/services/loan', () => ({
-  getAllLoans: vi.fn(),
-  getLoanById: vi.fn(),
-  createLoan: vi.fn(),
-  updateLoan: vi.fn(),
-  deleteLoan: vi.fn(),
-}));
+vi.mock('../services/loan', () => {
+  const MockLoanService = vi.fn();
+  MockLoanService.prototype.getAllLoans = vi.fn();
+  MockLoanService.prototype.getLoanById = vi.fn();
+  MockLoanService.prototype.createLoan = vi.fn();
+  MockLoanService.prototype.updateLoan = vi.fn();
+  MockLoanService.prototype.deleteLoan = vi.fn();
+
+  return {
+    LoanService: MockLoanService,
+  };
+});
 
 // Import mocked service for control
-import * as LoanService from '../../src/services/loan';
+import { LoanService } from '../services/loan';
 
-let mockRequest: Partial<Request>;
-let mockResponse: Partial<Response>;
-let mockJsonResponse: any;
-let mockStatus: any;
+const MOCK_LOAN = {
+  id: '1',
+  applicantName: 'Nata De Coco',
+  requestedAmount: 1000,
+  status: 'PENDING',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+const MOCK_LOANS = [
+  {
+    id: '1',
+    applicantName: 'Nata De Coco',
+    requestedAmount: 1000,
+    status: 'PENDING',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '2',
+    applicantName: 'Sopas Soup',
+    requestedAmount: 2000,
+    status: 'PENDING',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
 
 describe('getAllLoans', () => {
+  let req: Request;
+  let res: Response;
+
   beforeEach(() => {
-    mockStatus = vi.fn(() => ({ json: mockJsonResponse }));
-    mockJsonResponse = vi.fn();
-    mockRequest = {};
-    mockResponse = { status: mockStatus, json: mockJsonResponse };
+    req = {} as Request;
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as unknown as Response;
+
+    // Clear all mocks
     vi.clearAllMocks();
   });
 
   it('returns existing loans on success', async () => {
-    (LoanService.getAllLoans as any).mockResolvedValue([{ id: 1, applicantName: 'Marvin', status: 'APPROVED' }]);
+    // Mock the getAllLoans method to return our test data
+    (LoanService.prototype.getAllLoans as any).mockResolvedValue(MOCK_LOANS);
 
-    await LoanController.getAllLoans(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.getAllLoans(req, res);
 
-    expect(LoanService.getAllLoans).toHaveBeenCalledOnce();
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      data: [{ id: 1, applicantName: 'Marvin', status: 'APPROVED' }],
-      message: 'Loans retrieved successfully',
+    // Verify the service method was called
+    expect(LoanService.prototype.getAllLoans).toHaveBeenCalled();
+
+    // Verify the response
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOANS_RETRIEVED,
+      data: MOCK_LOANS,
     });
   });
 
-  it('returns error message if there are no loans', async () => {
-    (LoanService.getAllLoans as any).mockResolvedValue(null);
+  it('handles case when no loans exist', async () => {
+    // Mock the service to return null (no loans)
+    (LoanService.prototype.getAllLoans as any).mockResolvedValue(null);
 
-    await LoanController.getAllLoans(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.getAllLoans(req, res);
 
-    expect(LoanService.getAllLoans).toHaveBeenCalledOnce();
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'No existing loans',
+    // Verify the service method was called
+    expect(LoanService.prototype.getAllLoans).toHaveBeenCalledTimes(1);
+
+    // Verify the response for no loans case
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOANS_NOT_FOUND,
     });
   });
 });
 
 describe('getLoanById', () => {
+  let req: Request;
+  let res: Response;
+
   beforeEach(() => {
-    mockStatus = vi.fn(() => ({ json: mockJsonResponse }));
-    mockJsonResponse = vi.fn();
-    mockRequest = { params: { id: '1' } };
-    mockResponse = { status: mockStatus, json: mockJsonResponse };
+    req = { params: { id: '1' } } as unknown as Request;
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as unknown as Response;
+
+    // Clear all mocks
     vi.clearAllMocks();
   });
 
   it('returns loan by ID on success', async () => {
-    (LoanService.getLoanById as any).mockResolvedValue({ id: '1', applicantName: 'Marvin', status: 'APPROVED' });
+    // Mock the getLoanById method to return our test data
+    (LoanService.prototype.getLoanById as any).mockResolvedValue({
+      ...MOCK_LOAN,
+      status: 'APPROVED',
+    });
 
-    await LoanController.getLoanById(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.getLoanById(req, res);
 
-    expect(LoanService.getLoanById).toHaveBeenCalledWith('1');
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      data: { id: '1', applicantName: 'Marvin', status: 'APPROVED' },
-      message: 'Loan retrieved successfully',
+    // Verify the service method was called
+    expect(LoanService.prototype.getLoanById).toHaveBeenCalled();
+
+    // Verify the response
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOAN_RETRIEVED,
+      data: {
+        ...MOCK_LOAN,
+        status: 'APPROVED',
+      },
     });
   });
 
-  it('returns error message if loan not found', async () => {
-    (LoanService.getLoanById as any).mockResolvedValue(null);
+  it('handles case when loan is not found', async () => {
+    // Mock the service to return null (loan not found)
+    (LoanService.prototype.getLoanById as any).mockResolvedValue(null);
 
-    await LoanController.getLoanById(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.getLoanById(req, res);
 
-    expect(LoanService.getLoanById).toHaveBeenCalledWith('1');
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'Loan not found',
+    // Verify the service method was called
+    expect(LoanService.prototype.getLoanById).toHaveBeenCalled();
+
+    // Verify the response for loan not found case
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_OK);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOAN_NOT_FOUND,
     });
   });
 });
 
 describe('createLoan', () => {
+  let req: Request;
+  let res: Response;
   beforeEach(() => {
-    mockStatus = vi.fn(() => ({ json: mockJsonResponse }));
-    mockJsonResponse = vi.fn();
-    mockRequest = { body: { applicantName: 'Marvin', requestedAmount: 1000 } };
-    mockResponse = { status: mockStatus, json: mockJsonResponse };
+    req = {
+      body: {
+        applicantName: 'Super Nata',
+        requestedAmount: 5000,
+      },
+    } as unknown as Request;
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as unknown as Response;
+
+    // Clear all mocks
     vi.clearAllMocks();
   });
-
   it('creates a loan successfully', async () => {
-    (LoanService.createLoan as any).mockResolvedValue({ id: '1', applicantName: 'Marvin', requestedAmount: 1000 });
+    // Mock the createLoan method to return our test data
+    (LoanService.prototype.createLoan as any).mockResolvedValue({
+      applicantName: 'Super Nata',
+      requestedAmount: 5000,
+    });
 
-    await LoanController.createLoan(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.createLoan(req, res);
 
-    expect(LoanService.createLoan).toHaveBeenCalledWith('Marvin', 1000);
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_CREATED);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      data: { id: '1', applicantName: 'Marvin', requestedAmount: 1000 },
-      message: 'Loan created successfully',
+    // Verify the service method was called
+    expect(LoanService.prototype.createLoan).toHaveBeenCalledWith('Super Nata', 5000);
+
+    // Verify the response
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_CREATED);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOAN_CREATED,
+      data: {
+        applicantName: 'Super Nata',
+        requestedAmount: 5000,
+      },
     });
   });
 
   it('returns error message if the applicant name is missing', async () => {
-    mockRequest.body.applicantName = '';
+    req.body.applicantName = '';
 
-    await LoanController.createLoan(mockRequest as Request, mockResponse as Response);
+    await LoanController.createLoan(req, res);
 
-    expect(LoanService.createLoan).not.toHaveBeenCalled();
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_BAD_REQUEST);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'Invalid request payload',
+    expect(LoanService.prototype.createLoan).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.INVALID_REQUEST_PAYLOAD,
     });
   });
-
   it('returns error message if the requested amount is less than the minimum', async () => {
-    mockRequest.body.requestedAmount = 0;
+    req.body.requestedAmount = 0;
 
-    await LoanController.createLoan(mockRequest as Request, mockResponse as Response);
+    await LoanController.createLoan(req, res);
 
-    expect(LoanService.createLoan).not.toHaveBeenCalled();
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_BAD_REQUEST);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'Invalid request payload',
+    expect(LoanService.prototype.createLoan).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.INVALID_REQUEST_PAYLOAD,
+    });
+  });
+  it('returns error message if the requested amount is not provided', async () => {
+    req.body.requestedAmount = undefined;
+
+    await LoanController.createLoan(req, res);
+
+    expect(LoanService.prototype.createLoan).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.INVALID_REQUEST_PAYLOAD,
     });
   });
 });
 
 describe('updateLoan', () => {
+  let req: Request;
+  let res: Response;
+
   beforeEach(() => {
-    mockStatus = vi.fn(() => ({ json: mockJsonResponse }));
-    mockJsonResponse = vi.fn();
-    mockRequest = { params: { id: '1' }, body: { applicantName: 'Marvin', requestedAmount: 1000, status: 'APPROVED' } };
-    mockResponse = { status: mockStatus, json: mockJsonResponse };
+    req = {
+      params: { id: '1' },
+      body: {},
+    } as unknown as Request;
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as unknown as Response;
+
+    // Clear all mocks
     vi.clearAllMocks();
   });
 
   it('updates a loan successfully', async () => {
-    (LoanService.updateLoan as any).mockResolvedValue({ id: '1', applicantName: 'Marvin', requestedAmount: 1000, status: 'APPROVED' });
+    req.body = {
+      applicantName: 'Updated Nata',
+      requestedAmount: 6000,
+      status: 'APPROVED',
+    };
 
-    await LoanController.updateLoan(mockRequest as Request, mockResponse as Response);
+    // Mock the updateLoan method to return our test data
+    (LoanService.prototype.updateLoan as any).mockResolvedValue({
+      ...MOCK_LOAN,
+      applicantName: 'Updated Nata',
+      requestedAmount: 6000,
+      status: 'APPROVED',
+    });
 
-    expect(LoanService.updateLoan).toHaveBeenCalledWith('1', { applicantName: 'Marvin', requestedAmount: 1000, status: 'APPROVED' });
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_ACCEPTED);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      data: { id: '1', applicantName: 'Marvin', requestedAmount: 1000, status: 'APPROVED' },
-      message: 'Loan updated successfully',
+    // Call the controller function
+    await LoanController.updateLoan(req, res);
+
+    // Verify the service method was called
+    expect(LoanService.prototype.updateLoan).toHaveBeenCalledWith('1', {
+      applicantName: 'Updated Nata',
+      requestedAmount: 6000,
+      status: 'APPROVED',
+    });
+
+    // Verify the response
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_ACCEPTED);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOAN_UPDATED,
+      data: {
+        ...MOCK_LOAN,
+        applicantName: 'Updated Nata',
+        requestedAmount: 6000,
+        status: 'APPROVED',
+      },
     });
   });
 
   it('returns error message if no fields are provided for update', async () => {
-    mockRequest.body = {};
+    req.body = {};
 
-    await LoanController.updateLoan(mockRequest as Request, mockResponse as Response);
+    await LoanController.updateLoan(req, res);
 
-    expect(LoanService.updateLoan).not.toHaveBeenCalled();
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_BAD_REQUEST);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'Invalid request payload',
+    expect(LoanService.prototype.updateLoan).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.INVALID_REQUEST_PAYLOAD,
     });
   });
 });
 
 describe('deleteLoan', () => {
+  let req: Request;
+  let res: Response;
+
   beforeEach(() => {
-    mockStatus = vi.fn(() => ({ json: mockJsonResponse }));
-    mockJsonResponse = vi.fn();
-    mockRequest = { params: { id: '1' } };
-    mockResponse = { status: mockStatus, json: mockJsonResponse };
+    req = { params: { id: '1' } } as unknown as Request;
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as unknown as Response;
+
+    // Clear all mocks
     vi.clearAllMocks();
   });
 
   it('deletes a loan successfully', async () => {
-    (LoanService.getLoanById as any).mockResolvedValue({ id: '1', applicantName: 'Marvin', status: 'APPROVED' });
-    (LoanService.deleteLoan as any).mockResolvedValue(true);
+    // Mock the getLoanById method to return our test data
+    (LoanService.prototype.getLoanById as any).mockResolvedValue(MOCK_LOAN);
+    (LoanService.prototype.deleteLoan as any).mockResolvedValue(true);
 
-    await LoanController.deleteLoan(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.deleteLoan(req, res);
 
-    expect(LoanService.deleteLoan).toHaveBeenCalledWith('1');
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_ACCEPTED);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'Loan removed',
+    // Verify the service methods were called
+    expect(LoanService.prototype.getLoanById).toHaveBeenCalledWith('1');
+    expect(LoanService.prototype.deleteLoan).toHaveBeenCalledWith('1');
+
+    // Verify the response
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_ACCEPTED);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOAN_REMOVED,
     });
   });
 
   it('returns error message if loan not found', async () => {
-    (LoanService.getLoanById as any).mockResolvedValue(null);
+    // Mock the service to return null (loan not found)
+    (LoanService.prototype.getLoanById as any).mockResolvedValue(null);
 
-    await LoanController.deleteLoan(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.deleteLoan(req, res);
 
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'Loan not found',
+    // Verify the service method was called
+    expect(LoanService.prototype.getLoanById).toHaveBeenCalledWith('1');
+
+    // Verify the response for loan not found case
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOAN_NOT_FOUND,
     });
   });
 
   it('returns error message if deletion fails', async () => {
-    (LoanService.getLoanById as any).mockResolvedValue({ id: '1', applicantName: 'Marvin', status: 'APPROVED' });
-    (LoanService.deleteLoan as any).mockResolvedValue(false);
+    // Mock the getLoanById method to return our test data
+    (LoanService.prototype.getLoanById as any).mockResolvedValue(MOCK_LOAN);
+    // Mock the deleteLoan method to return false (deletion failed)
+    (LoanService.prototype.deleteLoan as any).mockResolvedValue(false);
 
-    await LoanController.deleteLoan(mockRequest as Request, mockResponse as Response);
+    // Call the controller function
+    await LoanController.deleteLoan(req, res);
 
-    expect(LoanService.deleteLoan).toHaveBeenCalledWith('1');
-    expect(mockStatus).toHaveBeenCalledWith(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR);
-    expect(mockJsonResponse).toHaveBeenCalledWith({
-      message: 'Loan not removed',
+    // Verify the service methods were called
+    expect(LoanService.prototype.getLoanById).toHaveBeenCalledWith('1');
+    expect(LoanService.prototype.deleteLoan).toHaveBeenCalledWith('1');
+
+    // Verify the response for deletion failure case
+    expect(res.status).toHaveBeenCalledWith(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({
+      message: MESSAGES.LOAN_NOT_REMOVED,
     });
   });
 });
