@@ -119,8 +119,29 @@ describe('updateLoan', () => {
     });
 
     const result = await service.updateLoan('1', { status: 'APPROVED' });
-    console.log('🚀 ~ result:', result);
 
     expect(result).toEqual(updatedLoan);
+  });
+});
+
+describe('deleteLoan', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should delete a loan successfully', async () => {
+    (db.query as any).mockResolvedValue({ rowCount: 1 });
+
+    const result = await service.deleteLoan('1');
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false if loan does not exist', async () => {
+    (db.query as any).mockResolvedValue({ rowCount: 0 });
+
+    const result = await service.deleteLoan('999');
+
+    expect(result).toBe(false);
   });
 });

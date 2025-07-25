@@ -1,4 +1,7 @@
-// TODO: Implement pagination and filtering
+/* TODO
+- implement pagination and filtering
+- refactor to use Dependency Injection
+*/
 import { Request, Response } from 'express';
 import { constants } from 'http2';
 import { LoanService } from '#/services/loan';
@@ -6,9 +9,9 @@ import { GenericResponse } from '#/models/response';
 import { MESSAGES } from '#/util/constants';
 
 const MINIMUM_REQUESTED_AMOUNT = 1;
+const service = new LoanService();
 
 export const getAllLoans = async (_req: Request, res: Response) => {
-  const service = new LoanService();
   const response: GenericResponse = {};
   const loans = await service.getAllLoans();
   if (!loans) {
@@ -22,10 +25,8 @@ export const getAllLoans = async (_req: Request, res: Response) => {
 };
 
 export const getLoanById = async (req: Request, res: Response) => {
-  const service = new LoanService();
   const response: GenericResponse = {};
   const loan = await service.getLoanById(req.params.id);
-  console.log('🚀 ~ getLoanById ~ loan:', loan);
 
   if (!loan) {
     response.message = MESSAGES.LOAN_NOT_FOUND;
@@ -38,7 +39,6 @@ export const getLoanById = async (req: Request, res: Response) => {
 };
 
 export const createLoan = async (req: Request, res: Response) => {
-  const service = new LoanService();
   const response: GenericResponse = {};
   const { applicantName, requestedAmount } = req.body;
 
@@ -55,7 +55,6 @@ export const createLoan = async (req: Request, res: Response) => {
 
 export const updateLoan = async (req: Request, res: Response) => {
   const response: GenericResponse = {};
-  const service = new LoanService();
   const { id } = req.params;
   const { applicantName, requestedAmount, status } = req.body;
 
@@ -76,12 +75,10 @@ export const updateLoan = async (req: Request, res: Response) => {
 };
 
 export const deleteLoan = async (req: Request, res: Response) => {
-  const service = new LoanService();
   const response: GenericResponse = {};
   const { id } = req.params;
 
   const loan = await service.getLoanById(id);
-  console.log('🚀 ~ deleteLoan ~ loan:', loan);
   if (!loan) {
     response.message = MESSAGES.LOAN_NOT_FOUND;
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json(response);
