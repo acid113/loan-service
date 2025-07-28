@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
@@ -8,6 +9,12 @@ import loanRoutes from '#/routes/loan';
 const app = express();
 
 app.use(express.json());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true, // if you're using cookies/auth
+  })
+);
 app.use('/api/loans', loanRoutes);
 
 // Swagger route
