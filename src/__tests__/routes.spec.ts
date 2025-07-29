@@ -24,7 +24,15 @@ vi.mock('#/controllers/loan', () => {
   };
 });
 
-describe('GET /loans', () => {
+vi.mock('#/middlewares/auth', () => {
+  return {
+    authenticate: (req: any, res: any, next: any) => {
+      next();
+    },
+  };
+});
+
+describe('GET /api/loans', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -37,7 +45,7 @@ describe('GET /loans', () => {
       });
     });
 
-    const res = await request(app).get('/loans');
+    const res = await request(app).get('/api/loans');
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_OK);
@@ -54,7 +62,7 @@ describe('GET /loans', () => {
       });
     });
 
-    const res = await request(app).get('/loans');
+    const res = await request(app).get('/api/loans');
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_OK);
@@ -63,7 +71,7 @@ describe('GET /loans', () => {
   });
 });
 
-describe('GET /loans/:id', () => {
+describe('GET /api/loans/:id', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -76,7 +84,7 @@ describe('GET /loans/:id', () => {
       });
     });
 
-    const res = await request(app).get('/loans/1');
+    const res = await request(app).get('/api/loans/1');
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_OK);
@@ -93,7 +101,7 @@ describe('GET /loans/:id', () => {
       });
     });
 
-    const res = await request(app).get('/loans/999');
+    const res = await request(app).get('/api/loans/999');
     const { status, body } = res;
     expect(status).toBe(constants.HTTP_STATUS_OK);
     expect(body.message).toEqual('Loan not found');
@@ -101,7 +109,7 @@ describe('GET /loans/:id', () => {
   });
 });
 
-describe('POST /loans', () => {
+describe('POST /api/loans', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -114,7 +122,7 @@ describe('POST /loans', () => {
       });
     });
 
-    const res = await request(app).post('/loans').send({ applicantName: 'Nata De Coco', requestedAmount: 1000 });
+    const res = await request(app).post('/api/loans').send({ applicantName: 'Nata De Coco', requestedAmount: 1000 });
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_CREATED);
@@ -131,7 +139,7 @@ describe('POST /loans', () => {
       });
     });
 
-    const res = await request(app).post('/loans').send({ applicantName: '', requestedAmount: -100 });
+    const res = await request(app).post('/api/loans').send({ applicantName: '', requestedAmount: -100 });
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_BAD_REQUEST);
@@ -140,7 +148,7 @@ describe('POST /loans', () => {
   });
 });
 
-describe('PUT /loans/:id', () => {
+describe('PUT /api/loans/:id', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -153,7 +161,7 @@ describe('PUT /loans/:id', () => {
       });
     });
 
-    const res = await request(app).put('/loans/1').send({ applicantName: 'Updated Name', requestedAmount: 2000 });
+    const res = await request(app).put('/api/loans/1').send({ applicantName: 'Updated Name', requestedAmount: 2000 });
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_OK);
@@ -170,7 +178,7 @@ describe('PUT /loans/:id', () => {
       });
     });
 
-    const res = await request(app).put('/loans/1').send({});
+    const res = await request(app).put('/api/loans/1').send({});
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_BAD_REQUEST);
@@ -185,7 +193,7 @@ describe('PUT /loans/:id', () => {
       });
     });
 
-    const res = await request(app).put('/loans/999').send({ applicantName: 'Nonexistent', requestedAmount: 500 });
+    const res = await request(app).put('/api/loans/999').send({ applicantName: 'Nonexistent', requestedAmount: 500 });
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR);
@@ -194,7 +202,7 @@ describe('PUT /loans/:id', () => {
   });
 });
 
-describe('DELETE /loans/:id', () => {
+describe('DELETE /api/loans/:id', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -206,7 +214,7 @@ describe('DELETE /loans/:id', () => {
       });
     });
 
-    const res = await request(app).delete('/loans/1');
+    const res = await request(app).delete('/api/loans/1');
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_ACCEPTED);
@@ -220,7 +228,7 @@ describe('DELETE /loans/:id', () => {
       });
     });
 
-    const res = await request(app).delete('/loans/999');
+    const res = await request(app).delete('/api/loans/999');
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR);
@@ -234,7 +242,7 @@ describe('DELETE /loans/:id', () => {
       });
     });
 
-    const res = await request(app).delete('/loans/1');
+    const res = await request(app).delete('/api/loans/1');
     const { status, body } = res;
 
     expect(status).toBe(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR);

@@ -14,8 +14,17 @@ export const swaggerOptions: swaggerJSDoc.Options = {
         url: 'http://localhost:3000',
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
-  apis: ['src/controllers/*.ts'], // where your JSDoc comments live
+  apis: ['src/controllers/*.ts', 'src/routes/auth.ts'],
 };
 
 export const swaggerSpec = swaggerJSDoc(swaggerOptions);

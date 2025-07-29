@@ -1,8 +1,3 @@
-/* TODO
-- implement pagination and filtering
-- update Swagger documentation
-- refactor to use Dependency Injection
-*/
 import { Request, Response } from 'express';
 import { constants } from 'http2';
 import { LoanService } from '#/services/loan';
@@ -41,6 +36,8 @@ const service = new LoanService();
  * /api/loans:
  *   get:
  *     summary: Get all loans
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of loans
@@ -69,6 +66,8 @@ export const getAllLoans = async (_req: Request, res: Response) => {
  * /api/loans/{id}:
  *   get:
  *     summary: Get a loan by ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -105,6 +104,8 @@ export const getLoanById = async (req: Request, res: Response) => {
  * /api/loans:
  *   post:
  *     summary: Create a new loan
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -149,6 +150,8 @@ export const createLoan = async (req: Request, res: Response) => {
  * /api/loans/{id}:
  *   put:
  *     summary: Update an existing loan
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -208,6 +211,8 @@ export const updateLoan = async (req: Request, res: Response) => {
  * /api/loans/{id}:
  *   delete:
  *     summary: Delete a loan by ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
