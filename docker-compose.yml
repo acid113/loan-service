@@ -11,6 +11,7 @@ services:
       - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./scripts/db:/docker-entrypoint-initdb.d:ro # SQL init scripts
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -26,21 +27,21 @@ services:
     depends_on:
       - db
 
-  app:
-    build: .
-    depends_on:
-      - db
-    ports:
-      - '3001:3001'
-    environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=admin
-      - DB_PASSWORD=password123
-      - DB_NAME=citoplusdb
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+  # app:
+  #   build: .
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - '3001:3001'
+  #   environment:
+  #     - DB_HOST=db
+  #     - DB_PORT=5432
+  #     - DB_USER=admin
+  #     - DB_PASSWORD=password123
+  #     - DB_NAME=citoplusdb
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
 
 volumes:
   pgdata:

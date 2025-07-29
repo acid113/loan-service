@@ -7,13 +7,18 @@ This is a simple microservice built with Node.js and TypeScript
 ```
 service
 ├── src
+│   ├── __tests__
 │   ├── controllers
+│   ├── database
+│   ├── docs
 │   ├── middlewares
+│   ├── models
 │   ├── routes
 │   ├── services
+│   ├── util
 │   └── index.ts
+├── .env
 ├── package.json
-├── tsconfig.json
 └── README.md
 ```
 
@@ -21,47 +26,126 @@ service
 
 To install the necessary dependencies, run:
 
-```
+```bash
 yarn
 ```
 
-## Running the Microservice
+## Environment file setup
+
+.env
+
+```
+PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+
+JWT_SECRET=
+JWT_EXPIRES_IN=3600
+```
+
+## Run the Microservice (Dev mode)
 
 To start the microservice in development mode, use the following command:
 
-```
+```bash
 yarn dev
 ```
 
 The service will be running on `http://localhost:3000`.
 
-## Endpoints
+## Run tests
 
-### Health Check
+**Vitest** is the chosen framework
 
-- **GET** `/health`
-
-This endpoint returns the health status of the microservice.
-
-## Docker
-
-Run and build
+Run all tests
 
 ```bash
-docker-compose up --build
+yarn test
+```
+
+Run tests with coverage
+
+```bash
+yarn test:coverage
+```
+
+Run specific test (ie. _canary.spec.ts_)
+
+```bash
+yarn test src/__tests__/canary.spec.ts
+```
+
+## Build the Microservice
+
+Run this command
+
+```bash
+yarn build
+```
+
+## Endpoints
+
+Base URL: http://localhost:3000/api/
+
+### Authentication
+
+- **POST** `/login` - login with username and password to get auth token
+
+Note: Make sure the _JWT_SECRET_ and _JWT_EXPIRES_IN_ are configured in the **.env** file.
+
+### Loans
+
+**Required**: Bearer token to run these endpoints
+
+- **GET** `/loans` - returns all loans
+- **GET** `/loans/<id>` - returns a specific loan by ID
+- **POST** `/loans` - creates a new loan
+- **PUT** `/loans` - updates a specific loan
+- **DELETE** `/loans/<id>` - removes a loan
+
+Response structure
+
+```
+{
+  message: <success or error message>,
+  data: <data created, updated, or requested>
+}
+```
+
+## Docker commands
+
+Rebuilds the images and restarts fresh containers with clean volumes.
+
+```bash
+docker compose up --build
 ```
 
 Stop services
 
 ```bash
-docker-compose down
+docker compose down
+```
+
+Stop and remove containers, networks, and volumes (including your database data).
+
+```bash
+docker compose down -v
+```
+
+Restart container, if already created
+
+```bash
+docker compose up
 ```
 
 ## DB Server Setup
 
-New server setup
+Database credentials, schema, table, and trigger configured in the _docker-compose.yml_
 
-_public.loans_ table
+_Note: Individual SQL scripts available in **"scripts"** folder if you wish to setup the database manually._
 
 ## License
 
