@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password123
-      POSTGRES_DB: citoplusdb
+      POSTGRES_DB: loanplusdb
     ports:
       - '5432:5432'
     volumes:
@@ -18,7 +18,7 @@ services:
     container_name: pgadmin-container
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: citoplus1@admin.com
+      PGADMIN_DEFAULT_EMAIL: loanplus1@admin.com
       PGADMIN_DEFAULT_PASSWORD: password123
     ports:
       - '8080:80'
@@ -38,7 +38,7 @@ services:
   #     - DB_PORT=5432
   #     - DB_USER=admin
   #     - DB_PASSWORD=password123
-  #     - DB_NAME=citoplusdb
+  #     - DB_NAME=loanplusdb
   #   volumes:
   #     - .:/usr/src/app
   #     - /usr/src/app/node_modules
