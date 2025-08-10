@@ -1,6 +1,8 @@
 # Loan Microservice
 
-This is a simple microservice built with Node.js and TypeScript
+This is a simple microservice consumed by the Loan Site.
+
+Tech stack: Node.js (TypeScript), Express.js, JWT for authenticatiom, Swagger for documentation, Supertest and Vitest for testing
 
 ## Project Structure
 
