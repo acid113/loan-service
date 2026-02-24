@@ -145,9 +145,12 @@ docker compose up
 
 ## DB Server Setup
 
-Database credentials, schema, table, and trigger configured in the _docker-compose.yml_
+Setting up database credentials, schema, table, and trigger configured in the **docker-compose.yml**. Refer to **public/images** folder for screenshots on how to add the server using pgAdmin.
 
 _Note: Individual SQL scripts available in **"scripts"** folder if you wish to setup the database manually._
+
+
+
 
 ## License
 
