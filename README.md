@@ -2,7 +2,11 @@
 
 This is a simple microservice consumed by the Loan Site.
 
-Tech stack: Node.js (TypeScript), Express.js, JWT for authenticatiom, Swagger for documentation, Supertest and Vitest for testing
+Tech stack: Node.js (TypeScript), NestJS, JWT for authentication, Swagger for documentation, Supertest and Vitest for testing
+
+## NestJS Migration
+
+The service has been migrated from Express to NestJS. The entrypoint is now `src/main.ts`, modules live under `src/auth` and `src/loan`, and Swagger is configured via `@nestjs/swagger` in `main.ts`.
 
 ## Project Structure
 
@@ -10,15 +14,13 @@ Tech stack: Node.js (TypeScript), Express.js, JWT for authenticatiom, Swagger fo
 service
 ├── src
 │   ├── __tests__
-│   ├── controllers
+│   ├── auth
 │   ├── database
-│   ├── docs
-│   ├── middlewares
+│   ├── loan
 │   ├── models
-│   ├── routes
-│   ├── services
 │   ├── util
-│   └── index.ts
+│   ├── app.module.ts
+│   └── main.ts
 ├── .env
 ├── package.json
 └── README.md
@@ -29,7 +31,7 @@ service
 To install the necessary dependencies, run:
 
 ```bash
-yarn
+yarn install
 ```
 
 ## Environment file setup
@@ -53,7 +55,7 @@ JWT_EXPIRES_IN=3600
 To start the microservice in development mode, use the following command:
 
 ```bash
-yarn dev
+yarn run dev
 ```
 
 The service will be running on `http://localhost:3000`.
@@ -71,13 +73,13 @@ yarn test
 Run tests with coverage
 
 ```bash
-yarn test:coverage
+yarn run test:coverage
 ```
 
 Run specific test (ie. _canary.spec.ts_)
 
 ```bash
-yarn test src/__tests__/canary.spec.ts
+npx vitest src/__tests__/canary.spec.ts
 ```
 
 ## Build the Microservice
@@ -85,7 +87,7 @@ yarn test src/__tests__/canary.spec.ts
 Run this command
 
 ```bash
-yarn build
+yarn run build
 ```
 
 ## Endpoints
@@ -94,7 +96,7 @@ Base URL: http://localhost:3000/api/
 
 ### Authentication
 
-- **POST** `/login` - login with username and password to get auth token
+- **POST** `/auth/login` - login with username and password to get auth token
 
 Note: Make sure the _JWT_SECRET_ and _JWT_EXPIRES_IN_ are configured in the **.env** file.
 
@@ -105,7 +107,7 @@ Note: Make sure the _JWT_SECRET_ and _JWT_EXPIRES_IN_ are configured in the **.e
 - **GET** `/loans` - returns all loans
 - **GET** `/loans/<id>` - returns a specific loan by ID
 - **POST** `/loans` - creates a new loan
-- **PUT** `/loans` - updates a specific loan
+- **PUT** `/loans/<id>` - updates a specific loan
 - **DELETE** `/loans/<id>` - removes a loan
 
 Response structure
@@ -124,6 +126,8 @@ Rebuilds the images and restarts fresh containers with clean volumes.
 ```bash
 docker compose up --build
 ```
+
+The container runs the NestJS build output (`dist/main.js`) via `npm start`. Ensure `.env` is present for DB and JWT configuration before building the image.
 
 Stop services
 
@@ -148,9 +152,6 @@ docker compose up
 Setting up database credentials, schema, table, and trigger configured in the **docker-compose.yml**. Refer to **public/images** folder for screenshots on how to add the server using pgAdmin.
 
 _Note: Individual SQL scripts available in **"scripts"** folder if you wish to setup the database manually._
-
-
-
 
 ## License
 

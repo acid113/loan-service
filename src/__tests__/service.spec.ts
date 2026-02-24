@@ -15,7 +15,7 @@ const MOCK_LOANS = [
   { id: '2', applicantName: 'Sopas Soup', requestedAmount: 2000, status: 'PENDING', createdAt: new Date(), updatedAt: new Date() },
 ];
 
-import { LoanService } from '../services/loan';
+import { LoanService } from '../loan/loan.service';
 
 // Mock the database module first
 vi.mock('../database/db', () => ({

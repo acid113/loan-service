@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "author": "Marvin Estacio",
   "description": "A sample loan microservice",
-  "main": "src/server.ts",
+  "main": "src/main.ts",
   "imports": {
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "tsx --watch --env-file .env src/server.ts",
-    "start": "node --env-file .env dist/server.js",
+    "dev": "tsx --watch --env-file .env src/main.ts",
+    "start": "node --env-file .env dist/main.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
@@ -21,16 +21,24 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/platform-express": "^11.1.6",
+    "@nestjs/swagger": "^11.2.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
-    "swagger-jsdoc": "^6.2.8",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
+    "@nestjs/testing": "^11.1.6",
     "@tsconfig/node22": "types/express",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",

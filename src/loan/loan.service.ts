@@ -1,7 +1,10 @@
+import { Injectable } from '@nestjs/common';
+
 import { db } from '#/database/db';
 import { Loan } from '#/models/loan';
 import { LOAN_STATUS } from '#/util/constants';
 
+@Injectable()
 export class LoanService {
   async getAllLoans(): Promise<Loan[] | null> {
     const result = await db.query('SELECT * FROM loans ORDER BY applicantName ASC');
@@ -37,7 +40,6 @@ export class LoanService {
       return null;
     }
 
-    // check if the loan exists
     const existingLoan = await this.getLoanById(id);
     if (!existingLoan) {
       console.error(`Loan with id ${id} not found`);
